@@ -1,0 +1,16 @@
+{
+    "name": "OpenNGS.Network.SignalR",
+    "rootNamespace": "",
+    "references": [
+        "OpenNGS.Network"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

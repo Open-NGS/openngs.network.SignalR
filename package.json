@@ -1,0 +1,24 @@
+{
+  "name": "com.openngs.network.signalr",
+  "displayName": "OpenNGS Network - SignalR",
+  "version": "0.3.0",
+  "description": "OpenNGS Network SignalR support package",
+  "main": "index.js",
+  "author": {
+    "name": "EE GAMES",
+    "email": "ray@eegames.com",
+    "url": "https://www.openngs.com"
+  },
+  "dependencies": {
+    "com.openngs.network": "0.3.0"
+  },
+  "license": "AGPL",
+  "keywords": [
+    "network",
+    "SignalR",
+    "unity3d",
+    "unity3d-npm",
+    "openngs",
+    "game"
+  ]
+}
