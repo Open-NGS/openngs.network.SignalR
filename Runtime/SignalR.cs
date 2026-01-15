@@ -1,4 +1,4 @@
-using AOT;
+﻿using AOT;
 using Microsoft.AspNetCore.SignalR.Client;
 using System;
 using System.Collections.Generic;
@@ -45,7 +45,7 @@ public class SignalR
     private HubConnection connection;
     private static string lastConnectionId;
 
-    private string accessToken;
+    public string accessToken;
 
     class DefaultRetryPolicy : IRetryPolicy
     {
