@@ -1,9 +1,5 @@
-﻿using AOT;
 using Microsoft.AspNetCore.SignalR.Client;
 using System;
-using System.Collections.Generic;
-using System.Runtime.InteropServices;
-using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -14,29 +10,27 @@ public class ConnectionEventArgs : EventArgs
 
 public class SignalR
 {
-    private static SignalR instance;
     public SignalR()
     {
-        instance = this;
     }
 
-    private static void OnConnectionStarted(string connectionId)
+    private void OnConnectionStarted(string connectionId)
     {
         var args = new ConnectionEventArgs
         {
             ConnectionId = connectionId
         };
-        instance.ConnectionStarted?.Invoke(instance, args);
+        ConnectionStarted?.Invoke(this, args);
     }
     public event EventHandler<ConnectionEventArgs> ConnectionStarted;
 
-    private static void OnConnectionClosed(string connectionId)
+    private void OnConnectionClosed(string connectionId)
     {
         var args = new ConnectionEventArgs
         {
             ConnectionId = connectionId
         };
-        instance.ConnectionClosed?.Invoke(instance, args);
+        ConnectionClosed?.Invoke(this, args);
     }
     public event EventHandler<ConnectionEventArgs> ConnectionClosed;
 
@@ -112,7 +106,7 @@ public class SignalR
         }
     }
 
-    private static Task OnConnectionClosedEvent(Exception exception)
+    private Task OnConnectionClosedEvent(Exception exception)
     {
         if (exception != null)
         {
@@ -131,7 +125,7 @@ public class SignalR
         return Task.CompletedTask;
     }
 
-    private static Task OnConnectionReconnectedEvent(string connectionId)
+    private Task OnConnectionReconnectedEvent(string connectionId)
     {
         Debug.LogWarning($"Connection successfully reconnected. The ConnectionId is now: {connectionId}");
 
