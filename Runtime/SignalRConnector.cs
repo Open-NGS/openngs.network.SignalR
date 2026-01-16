@@ -1,9 +1,6 @@
-using Microsoft.AspNetCore.SignalR.Client;
+﻿using Microsoft.AspNetCore.SignalR.Client;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -33,10 +30,15 @@ public class SignalRConnector : IConnector
 
     public bool IsConnected { get; private set; }
 
+    private string strToken = string.Empty;
+    public void SetToken(string token)
+    {
+        strToken = token;
+    }
     public void Init(string serverAddress)
     {
-
         signalR = new SignalR();
+        signalR.accessToken = strToken;
         signalR.Init(serverAddress, retryPolicy);
         signalR.ConnectionStarted += (object sender, ConnectionEventArgs e) =>
         {
