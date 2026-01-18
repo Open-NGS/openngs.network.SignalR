@@ -1,6 +1,9 @@
+using Microsoft.AspNetCore.Http.Connections;
+using Microsoft.AspNetCore.Http.Connections.Client;
 using Microsoft.AspNetCore.SignalR.Client;
 using System;
 using System.Threading.Tasks;
+using UnityEditor.MemoryProfiler;
 using UnityEngine;
 
 public class ConnectionEventArgs : EventArgs
@@ -23,6 +26,10 @@ public class SignalR
         ConnectionStarted?.Invoke(this, args);
     }
     public event EventHandler<ConnectionEventArgs> ConnectionStarted;
+    public event EventHandler<ConnectionEventArgs> ConnectionClosed;
+
+    public event EventHandler<ConnectionEventArgs> Reconnecting;
+    public event EventHandler<ConnectionEventArgs> Reconnected;
 
     private void OnConnectionClosed(string connectionId)
     {
@@ -32,7 +39,24 @@ public class SignalR
         };
         ConnectionClosed?.Invoke(this, args);
     }
-    public event EventHandler<ConnectionEventArgs> ConnectionClosed;
+
+    private void OnReconnecting(string connectionId)
+    {
+        var args = new ConnectionEventArgs
+        {
+            ConnectionId = connectionId
+        };
+        Reconnecting?.Invoke(this, args);
+    }
+
+    private void OnReconnected(string connectionId)
+    {
+        var args = new ConnectionEventArgs
+        {
+            ConnectionId = connectionId
+        };
+        Reconnected?.Invoke(this, args);
+    }
 
 #if UNITY_EDITOR || UNITY_STANDALONE
 
@@ -48,7 +72,7 @@ public class SignalR
             return TimeSpan.FromSeconds(5f);
         }
     }
-    public void Init(string url, IRetryPolicy retryPolicy)
+    public void Init(string url, IRetryPolicy retryPolicy, Action<HttpConnectionOptions> configureHttpConnection)
     {
         try
         {
@@ -59,7 +83,12 @@ public class SignalR
             connection = new HubConnectionBuilder()
             .WithUrl(url, options =>
             {
-                options.AccessTokenProvider = () => Task.FromResult(accessToken);
+                if(!string.IsNullOrEmpty(accessToken))
+                {
+                    options.AccessTokenProvider = () => Task.FromResult(accessToken);
+                };
+                if (configureHttpConnection != null)
+                    configureHttpConnection(options);
             })
             .WithAutomaticReconnect(retryPolicy)
             .Build();
@@ -112,27 +141,22 @@ public class SignalR
         {
             Debug.LogError(exception.Message);
         }
-
         OnConnectionClosed(lastConnectionId);
-
         return Task.CompletedTask;
     }
 
-    private static Task OnConnectionReconnectingEvent(Exception exception)
+    private Task OnConnectionReconnectingEvent(Exception exception)
     {
         Debug.LogWarning($"Connection started reconnecting due to an error: {exception.Message}");
-
+        OnReconnecting(lastConnectionId);
         return Task.CompletedTask;
     }
 
     private Task OnConnectionReconnectedEvent(string connectionId)
     {
         Debug.LogWarning($"Connection successfully reconnected. The ConnectionId is now: {connectionId}");
-
         lastConnectionId = connectionId;
-
-        OnConnectionStarted(lastConnectionId);
-
+        OnReconnected(lastConnectionId);
         return Task.CompletedTask;
     }
 

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.SignalR.Client;
+using Microsoft.AspNetCore.Http.Connections.Client;
+using Microsoft.AspNetCore.SignalR.Client;
 using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
@@ -15,15 +16,13 @@ public class SignalRConnector : IConnector
     public event Action OnError;
     public float Latency { get; private set; } = 200;
 
-    public SignalRConnector(IRetryPolicy retryPolicy)
+    private Action<HttpConnectionOptions> configureHttpConnection;
+
+    public SignalRConnector(IRetryPolicy retryPolicy, Action<HttpConnectionOptions> configure)
     {
         IsConnected = false;
         this.retryPolicy = retryPolicy;
-    }
-
-    public SignalRConnector(string serverAddress)
-    {
-
+        this.configureHttpConnection = configure;
     }
 
     private IRetryPolicy retryPolicy { get; set; }
@@ -39,7 +38,8 @@ public class SignalRConnector : IConnector
     {
         signalR = new SignalR();
         signalR.accessToken = strToken;
-        signalR.Init(serverAddress, retryPolicy);
+        signalR.Init(serverAddress, retryPolicy, this.configureHttpConnection);
+
         signalR.ConnectionStarted += (object sender, ConnectionEventArgs e) =>
         {
             OnConnected?.Invoke();
@@ -50,6 +50,19 @@ public class SignalRConnector : IConnector
             //DisplayMessage($"Disconnected: {e.ConnectionId}");
             IsConnected = false;
             OnDisconnected?.Invoke();
+        };
+
+        signalR.Reconnecting += (object sender, ConnectionEventArgs e) =>
+        {
+            //DisplayMessage($"Reconnecting: {e.ConnectionId}");
+            IsConnected = false;
+            OnDisconnected?.Invoke();
+        };
+        signalR.Reconnected += (object sender, ConnectionEventArgs e) =>
+        {
+            //DisplayMessage($"Reconnecting: {e.ConnectionId}");
+            IsConnected = true;
+            OnConnected?.Invoke();
         };
 
         signalR.On<string>("ReceiveMessage", message => OnMessageReceived?.Invoke(message));
