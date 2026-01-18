@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http.Connections.Client;
 using Microsoft.AspNetCore.SignalR.Client;
 using System;
 using System.Threading.Tasks;
+using UnityEditor.MemoryProfiler;
 using UnityEngine;
 
 public class ConnectionEventArgs : EventArgs
@@ -170,7 +171,7 @@ public class SignalR
     public async Task<T> InvokeAsync<T>(string methodName, object arg1, object arg2, object arg3) =>
         await connection.InvokeAsync<T>(methodName, arg1, arg2, arg3);
 
-    #region Invoke Editor
+    #region Invoke
     public async Task Invoke(string methodName, object arg1) =>
         await connection.InvokeAsync(methodName, arg1);
     public async Task Invoke(string methodName, object arg1, object arg2) =>
@@ -193,7 +194,10 @@ public class SignalR
         await connection.InvokeAsync(methodName, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10);
     #endregion
 
-    #region On Editor
+    #region Event Handlers
+
+    public void Remove(string methodName) => connection.Remove(methodName);
+
     public void On<T1>(string methodName, Action<T1> handler) =>
         connection.On(methodName, (T1 arg1) => handler.Invoke(arg1));
     public void On<T1, T2>(string methodName, Action<T1, T2> handler) =>

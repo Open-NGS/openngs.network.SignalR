@@ -65,6 +65,7 @@ public class SignalRConnector : IConnector
             OnConnected?.Invoke();
         };
 
+        signalR.Remove("ReceiveMessage");
         signalR.On<string>("ReceiveMessage", message => OnMessageReceived?.Invoke(message));
 
     }
