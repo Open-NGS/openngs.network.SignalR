@@ -29,13 +29,18 @@ public class SignalRConnector : IConnector
 
     public bool IsConnected { get; private set; }
 
+    private string accessToken;
+
     public void SetToken(string token)
     {
-        signalR.accessToken = token;
+        this.accessToken = token;
+        if (signalR != null)
+            signalR.accessToken = token;
     }
     public void Init(string serverAddress)
     {
         signalR = new SignalR();
+        signalR.accessToken = this.accessToken;
         signalR.Init(serverAddress, retryPolicy, this.configureHttpConnection);
 
         signalR.ConnectionStarted += (object sender, ConnectionEventArgs e) =>
