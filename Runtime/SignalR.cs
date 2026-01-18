@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Http.Connections.Client;
 using Microsoft.AspNetCore.SignalR.Client;
 using System;
 using System.Threading.Tasks;
-using UnityEditor.MemoryProfiler;
 using UnityEngine;
 
 public class ConnectionEventArgs : EventArgs
@@ -74,29 +73,23 @@ public class SignalR
     }
     public void Init(string url, IRetryPolicy retryPolicy, Action<HttpConnectionOptions> configureHttpConnection)
     {
-        try
+        if (retryPolicy == null)
         {
-            if (retryPolicy == null)
+            retryPolicy = new DefaultRetryPolicy();
+        }
+        connection = new HubConnectionBuilder()
+        .WithUrl(url, options =>
+        {
+            if (!string.IsNullOrEmpty(accessToken))
             {
-                retryPolicy = new DefaultRetryPolicy();
+                options.AccessTokenProvider = () => Task.FromResult(accessToken);
             }
-            connection = new HubConnectionBuilder()
-            .WithUrl(url, options =>
-            {
-                if(!string.IsNullOrEmpty(accessToken))
-                {
-                    options.AccessTokenProvider = () => Task.FromResult(accessToken);
-                };
-                if (configureHttpConnection != null)
-                    configureHttpConnection(options);
-            })
-            .WithAutomaticReconnect(retryPolicy)
-            .Build();
-        }
-        catch (Exception ex)
-        {
-            Debug.LogError(ex.Message);
-        }
+            ;
+            if (configureHttpConnection != null)
+                configureHttpConnection(options);
+        })
+        .WithAutomaticReconnect(retryPolicy)
+        .Build();
     }
 
     public async Task Connect()

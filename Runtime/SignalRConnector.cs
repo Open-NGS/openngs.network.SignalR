@@ -13,7 +13,7 @@ public class SignalRConnector : IConnector
     public event Action<string> OnMessageReceived;
     public event Action OnConnected;
     public event Action OnDisconnected;
-    public event Action OnError;
+    public event Action<string> OnError;
     public float Latency { get; private set; } = 200;
 
     private Action<HttpConnectionOptions> configureHttpConnection;
@@ -41,8 +41,6 @@ public class SignalRConnector : IConnector
     {
         signalR = new SignalR();
         signalR.accessToken = this.accessToken;
-        signalR.Init(serverAddress, retryPolicy, this.configureHttpConnection);
-
         signalR.ConnectionStarted += (object sender, ConnectionEventArgs e) =>
         {
             OnConnected?.Invoke();
@@ -68,6 +66,14 @@ public class SignalRConnector : IConnector
         signalR.Remove("ReceiveMessage");
         signalR.On<string>("ReceiveMessage", message => OnMessageReceived?.Invoke(message));
 
+        try
+        {
+            signalR.Init(serverAddress, retryPolicy, this.configureHttpConnection);
+        }
+        catch (Exception ex)
+        {
+            OnError?.Invoke(ex.Message);
+        }
     }
     public async Task Connect() => await signalR?.Connect();
 
@@ -102,7 +108,7 @@ public class SignalRConnector : IConnector
         return await signalR.InvokeAsync<T>(methodName, args1, args2, args3);
     }
 
-
+    public void Remove(string methodName) => signalR.Remove(methodName);
     public void On<T1>(string methodName, Action<T1> handler)
     {
         signalR.On(methodName, handler);
