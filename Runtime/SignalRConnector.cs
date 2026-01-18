@@ -63,9 +63,6 @@ public class SignalRConnector : IConnector
             OnConnected?.Invoke();
         };
 
-        signalR.Remove("ReceiveMessage");
-        signalR.On<string>("ReceiveMessage", message => OnMessageReceived?.Invoke(message));
-
         try
         {
             signalR.Init(serverAddress, retryPolicy, this.configureHttpConnection);
@@ -74,6 +71,10 @@ public class SignalRConnector : IConnector
         {
             OnError?.Invoke(ex.Message);
         }
+
+        signalR.Remove("ReceiveMessage");
+        signalR.On<string>("ReceiveMessage", message => OnMessageReceived?.Invoke(message));
+
     }
     public async Task Connect() => await signalR?.Connect();
 

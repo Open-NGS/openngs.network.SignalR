@@ -189,7 +189,7 @@ public class SignalR
 
     #region Event Handlers
 
-    public void Remove(string methodName) => connection.Remove(methodName);
+    public void Remove(string methodName) => connection?.Remove(methodName);
 
     public void On<T1>(string methodName, Action<T1> handler) =>
         connection.On(methodName, (T1 arg1) => handler.Invoke(arg1));
