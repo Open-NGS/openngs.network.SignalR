@@ -29,15 +29,13 @@ public class SignalRConnector : IConnector
 
     public bool IsConnected { get; private set; }
 
-    private string strToken = string.Empty;
     public void SetToken(string token)
     {
-        strToken = token;
+        signalR.accessToken = token;
     }
     public void Init(string serverAddress)
     {
         signalR = new SignalR();
-        signalR.accessToken = strToken;
         signalR.Init(serverAddress, retryPolicy, this.configureHttpConnection);
 
         signalR.ConnectionStarted += (object sender, ConnectionEventArgs e) =>
@@ -47,20 +45,17 @@ public class SignalRConnector : IConnector
         };
         signalR.ConnectionClosed += (object sender, ConnectionEventArgs e) =>
         {
-            //DisplayMessage($"Disconnected: {e.ConnectionId}");
             IsConnected = false;
             OnDisconnected?.Invoke();
         };
 
         signalR.Reconnecting += (object sender, ConnectionEventArgs e) =>
         {
-            //DisplayMessage($"Reconnecting: {e.ConnectionId}");
             IsConnected = false;
             OnDisconnected?.Invoke();
         };
         signalR.Reconnected += (object sender, ConnectionEventArgs e) =>
         {
-            //DisplayMessage($"Reconnecting: {e.ConnectionId}");
             IsConnected = true;
             OnConnected?.Invoke();
         };
