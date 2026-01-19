@@ -106,13 +106,11 @@ public class SignalR
             connection.Closed += OnConnectionClosedEvent;
             connection.Reconnecting += OnConnectionReconnectingEvent;
             connection.Reconnected += OnConnectionReconnectedEvent;
-
             OnConnectionStarted(lastConnectionId);
-            Debug.Log("SignalR: Connect");
         }
         catch (Exception ex)
         {
-            Debug.LogError(ex.ToString());
+            throw ex;
         }
     }
 
