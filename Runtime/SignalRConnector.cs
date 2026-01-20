@@ -28,6 +28,7 @@ public class SignalRConnector : IConnector
     private IRetryPolicy retryPolicy { get; set; }
 
     public bool IsConnected { get; private set; }
+    public string AccessToken { get => accessToken; set { SetToken(value); } }
 
     private string accessToken;
 

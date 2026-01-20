@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.SignalR.Client;
 using System;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class ConnectionEventArgs : EventArgs
 {
@@ -29,6 +30,8 @@ public class SignalR
 
     public event EventHandler<ConnectionEventArgs> Reconnecting;
     public event EventHandler<ConnectionEventArgs> Reconnected;
+
+    public Func<Task<string?>>? AccessTokenProvider { get; set; }
 
     private void OnConnectionClosed(string connectionId)
     {
@@ -80,16 +83,21 @@ public class SignalR
         connection = new HubConnectionBuilder()
         .WithUrl(url, options =>
         {
-            if (!string.IsNullOrEmpty(accessToken))
-            {
-                options.AccessTokenProvider = () => Task.FromResult(accessToken);
-            }
-            ;
+            options.AccessTokenProvider = GetAccessToken;
             if (configureHttpConnection != null)
                 configureHttpConnection(options);
         })
+        .WithStatefulReconnect()
         .WithAutomaticReconnect(retryPolicy)
         .Build();
+    }
+
+    private async Task<string> GetAccessToken()
+    {
+        Debug.LogWarning("GetAccessToken()...");
+        if (AccessTokenProvider != null)
+            return await this.AccessTokenProvider();
+        return this.accessToken;
     }
 
     public async Task Connect()
