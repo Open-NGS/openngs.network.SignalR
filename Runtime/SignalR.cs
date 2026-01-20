@@ -88,6 +88,8 @@ public class SignalR
                 configureHttpConnection(options);
         })
         .WithStatefulReconnect()
+        .WithKeepAliveInterval(TimeSpan.FromSeconds(15))
+        .WithServerTimeout(TimeSpan.FromSeconds(60))
         .WithAutomaticReconnect(retryPolicy)
         .Build();
     }
